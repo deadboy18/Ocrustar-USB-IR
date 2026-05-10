@@ -56,7 +56,7 @@
 
 ## Background
 
-The **Ocrustar Smart IR Blaster** is a tiny USB dongle sold on AliExpress and Amazon for around $6. Plug it into an Android phone (or a PC via USB-OTG), and it turns the device into a universal infrared remote control. The official app is called **Ocrustar** (package name `com.payne.okux`, built on the ElkSmart IR SDK `com.esmart.ir`).
+The official app is called **Ocrustar** ([Google Play](https://play.google.com/store/apps/details?id=com.payne.okux&hl=en) · [App Store](https://apps.apple.com/my/app/ocrustar/id1544017376) · [APKPure](https://apkpure.com/ocrustar-remote-control/com.payne.okux)), package name `com.payne.okux`, built on the ElkSmart IR SDK (`com.esmart.ir`).
 
 These devices are rebranded variants of a design that appears under many names: ElkSmart, ZaZa Remote, Tiqiaa TView, ROCK IR, and others. They all share a common chipset and protocol family, but the specific encoding details differ between hardware revisions. The device covered here identifies as **D226** during handshake and uses a particularly interesting encoding pipeline that includes Huffman compression — making it more complex than the older D552 variant.
 
