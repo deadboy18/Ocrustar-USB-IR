@@ -278,6 +278,10 @@ Raw timings (µs)
      USB bulk writes (2ms interval)
 ```
 
+<p align="center">
+  <img src="images/encoding_pipeline.svg" alt="Encoding Pipeline Diagram" width="800">
+</p>
+
 ### Stage 1: Pulse Compression (WAVZip)
 
 The name "WAVZip" comes from the decompiled class name `com.esmart.ir.otg.b` (WAVZip.kt). IR signals are highly repetitive — a typical NEC command has ~34 pulse pairs, but only uses 2–3 distinct (mark, space) durations. The encoder exploits this:
@@ -693,6 +697,12 @@ See [`ocrustar.py`](ocrustar.py) for the complete implementation and [`docs/PROT
 4. Set target driver to **WinUSB** → Click **Replace Driver**
 5. Verify in Device Manager: "SMART" should appear under Universal Serial Bus devices with no yellow triangle
 
+<p align="center">
+  <img src="images/zadig_windows.png" alt="Zadig WinUSB driver setup for SMART device" width="500">
+  <br>
+  <em>Zadig — select the SMART device and replace the driver with WinUSB</em>
+</p>
+
 ---
 
 ## Debugging & Troubleshooting
@@ -709,6 +719,12 @@ See [`ocrustar.py`](ocrustar.py) for the complete implementation and [`docs/PROT
 ### Verifying IR Output
 
 Phone cameras can see near-infrared light. Open your camera app, point it at the IR LED on the dongle, and send a signal. You should see a faint purple/white flash from the LED.
+
+<p align="center">
+  <img src="images/ir_led_flash.jpeg" alt="IR LED flash visible through phone camera" width="400">
+  <br>
+  <em>IR LED firing — the purple glow is invisible to the naked eye but shows up on phone cameras</em>
+</p>
 
 ---
 
