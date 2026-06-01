@@ -158,33 +158,43 @@ def frame_checksum(frame_bytes):
 
 def leb128_encode(value):
     """
-    LEB128 encode a timing value WITH mandatory ÷16 prescaling.
+    Encode a timing value (µs) using the firmware's two-regime scheme.
 
-    The device hardware operates on 16µs ticks. All timing values (in
-    microseconds) must be divided by 16 before encoding. This prescaling
-    step is not obvious from the code and is the #1 cause of encoding bugs.
+    The device distinguishes encodings by the high bit of the first byte:
 
-    Special cases:
-    - Values ≤ 1 are returned as-is (used for dictionary indices 0x00/0x01)
-    - The byte 0xFF is reserved as a separator; any LEB128 output byte
-      that would be 0xFF is clamped to 0xFE
+    - value ≤ 2032µs: a SINGLE byte = round(µs / 16). The high bit is clear,
+      so the device decodes it back as byte × 16. (Values 0 and 1 are passed
+      through as-is — they double as the dictionary indices 0x00 / 0x01.)
+
+    - value > 2032µs: LEB128 of the RAW microseconds, NOT prescaled. The first
+      byte's continuation bit is set, which is how the device knows to decode
+      the value directly in µs instead of multiplying by 16.
+
+    Prescaling EVERY value by 16 (the previous behavior) is the #1 cause of
+    encoding bugs: any pulse over 2032µs — i.e. every IR lead-in mark and
+    inter-frame gap — then transmits ~16× too short and is undecodable by the
+    receiver, even though the IR LED still visibly fires.
+
+    The byte 0xFF is reserved as a separator; any output byte that would be
+    0xFF is clamped to 0xFE.
     """
-    if value <= 1:
-        return [value]
+    if value <= 2032:
+        # 0 and 1 pass through (dictionary indices); else single ÷16 tick byte
+        q = value if value in (0, 1) else int(value / 16.0 + 0.5)
+        return [q & 0xFF]
 
-    # Prescale: convert µs to 16µs ticks (with rounding)
-    scaled = int(value / 16.0 + 0.5)
-
+    # Large value: LEB128 of the raw microseconds (no prescaling)
     result = []
+    raw = value
     while True:
-        byte = scaled & 0x7F
-        scaled >>= 7
-        if scaled:
+        byte = raw & 0x7F
+        raw >>= 7
+        if raw:
             byte |= 0x80  # set continuation bit
         if (byte & 0xFF) == 0xFF:
             byte = 0xFE   # escape 0xFF (reserved separator)
         result.append(byte & 0xFF)
-        if not scaled:
+        if not raw:
             break
     return result
 
