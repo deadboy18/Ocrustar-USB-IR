@@ -48,7 +48,7 @@ except ImportError:
 # Constants
 # ---------------------------------------------------------------------------
 USB_VID = 0x045C  # Renesas/NEC (borrowed by device)
-USB_PID = 0x02AA  # Ocrustar IR Blaster
+USB_PIDS = [0x02AA, 0x014A, 0x0134, 0x0195, 0x0184, 0x0130, 0x0189, 0x018F, 0x0131, 0x0132, 0x0133]
 
 # Handshake tokens
 TOKEN_HELLO     = bytes([0xFC] * 4)
@@ -447,19 +447,23 @@ class OcrustarDevice:
 
     def connect(self):
         """Find and claim the USB device. Returns True on success."""
-        self.device = usb.core.find(
-            idVendor=USB_VID,
-            idProduct=USB_PID,
-            backend=_backend,
-        )
+        for pid in USB_PIDS:
+            self.device = usb.core.find(
+                idVendor=USB_VID,
+                idProduct=pid,
+                backend=_backend,
+            )
+            if self.device:
+                break
         if not self.device:
-            print(f"Device not found (VID=0x{USB_VID:04X} PID=0x{USB_PID:04X})")
+            pids_str = ", ".join(f"0x{p:04X}" for p in USB_PIDS)
+            print(f"Device not found (VID=0x{USB_VID:04X}, PIDs=[{pids_str}])")
             print("  - Is the device plugged in?")
             print("  - On Linux, you may need: sudo or a udev rule")
             print("  - On Windows, install libusb via Zadig")
             return False
 
-        print(f"Found device: VID=0x{USB_VID:04X} PID=0x{USB_PID:04X}")
+        print(f"Found device: VID=0x{USB_VID:04X} PID=0x{self.device.idProduct:04X}")
 
         # Detach kernel driver if necessary (Linux)
         try:
